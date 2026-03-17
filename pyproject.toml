@@ -1,0 +1,20 @@
+[project]
+name = "tcr-source-detection"
+version = "0.1.0"
+description = "A robust pipeline for detecting TCR sequence provenance against Iggytop and 10X databases."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "scanpy",
+    "anndata",
+    "pandas",
+    "numpy",
+    "scirpy",
+    "openpyxl"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.scripts]
+tcr-source-detect = "tcr_source_detection.cli:run_pipeline"
