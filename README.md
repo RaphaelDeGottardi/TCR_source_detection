@@ -18,6 +18,8 @@ This project uses `uv` for dependency management.
 uv sync
 ```
 
+Also go to [Iggytop](https://github.com/biocypher/iggytop) and follow the instructions to create the merged_adata.h5ad. Add the path to this file to cli.py > DEFAULT_IGGYTOP_PATH .
+
 ## Usage
 
 You can run the pipeline using `main.py` or the provided CLI script.
