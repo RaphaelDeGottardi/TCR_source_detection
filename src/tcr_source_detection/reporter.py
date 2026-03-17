@@ -3,7 +3,7 @@ import os
 import json
 from datetime import datetime
 
-def generate_coverage_report(df: pd.DataFrame, dataset_path: str, output_log: str = "coverage_report.log"):
+def generate_coverage_report(df: pd.DataFrame, source_path: str, dataset_path: str, output_log: str = "coverage_report.log"):
     """
     Prints summary stats and writes detailed logs/results to files.
     """
@@ -23,6 +23,7 @@ def generate_coverage_report(df: pd.DataFrame, dataset_path: str, output_log: st
     with open(output_log, "a") as f:
         log_and_print(f"\n{'='*50}", f)
         log_and_print(f"REPORT GENERATED: {timestamp}", f)
+        log_and_print(f"Source Dataset: {source_path}", f)
         log_and_print(f"Target Dataset: {dataset_path}", f)
         log_and_print(f"Total Records: {total_records:,}", f)
         log_and_print(f"{'-'*30}", f)

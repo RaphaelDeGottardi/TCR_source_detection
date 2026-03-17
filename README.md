@@ -18,7 +18,8 @@ This project uses `uv` for dependency management.
 uv sync
 ```
 
-Also go to [Iggytop](https://github.com/biocypher/iggytop) and follow the instructions to create the merged_adata.h5ad. Add the path to this file to cli.py > DEFAULT_IGGYTOP_PATH .
+Also go to [Iggytop](https://github.com/biocypher/iggytop) and follow the instructions to create the merged_adata.h5ad. Add the path to this file to cli.py > DEFAULT_IGGYTOP_PATH. you need to also update the path in the tcr_configs.json if you are using it.
+Pro-tip (outcomment the filtering for 10X records in base_adapter to obtain all the records from the [10Xdataset](https://www.10xgenomics.com/library/a14cde) found in the databases)
 
 ## Usage
 

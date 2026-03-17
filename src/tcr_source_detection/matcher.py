@@ -90,10 +90,23 @@ class TCRMatcher:
         if (pd.isna(a_norm) or a_norm == "") and (pd.isna(b_norm) or b_norm == ""):
             return "No CDR3 info", ""
 
-        # Priority 1: Exact Match in Iggytop
+        # Pre-check for 10X exclusion from input pmid or sequence match in local 10X ref
         triplet = (a_norm, b_norm, pep_norm)
+        is_tenx_by_seq = triplet in self.tenx_full_set or \
+                        ((a_norm, pep_norm) in self.tenx_a_pep if not pd.isna(a_norm) else False) or \
+                        ((b_norm, pep_norm) in self.tenx_b_pep if not pd.isna(b_norm) else False)
+        
+        if str(pmid).startswith("https://www.10x") or is_tenx_by_seq:
+            return "Unmatched (10X Exclusion)", "10X"
+
+        # Priority 1: Exact Match in Iggytop
         if triplet in self.iggy_full_set:
             source_info = self.iggy_source_map.get(triplet, "")
+            
+            # Sub-check: If matching part of Iggytop that is actually 10X
+            if "https://www.10xgenomics.com" in source_info or "no_pmid_1036521" in source_info:
+                return "Unmatched (10X Exclusion)", f"Iggytop/10X ({source_info})"
+                
             return "Exact Match (Full)", source_info
 
         # Priority 2: Partial Match in Iggytop
@@ -102,12 +115,9 @@ class TCRMatcher:
         if a_pep_match or b_pep_match:
             return "Partial Match (A/B)", ""
 
-        # Priority 3: 10X Exclusion
-        if triplet in self.tenx_full_set or \
-           ((a_norm, pep_norm) in self.tenx_a_pep if not pd.isna(a_norm) else False) or \
-           ((b_norm, pep_norm) in self.tenx_b_pep if not pd.isna(b_norm) else False) or \
-           str(pmid).startswith("https://www.10x"):
-            return "Unmatched (10X Exclusion)", "10X"
+        # Priority 3: Final 10X check (already handled by pre-check logic above, 
+        # but kept for logical flow if non-full matches were allowed in 10X ref)
+        # However, we've already checked 10X by sequence above to prioritize it over Exact Match.
 
         # Priority 4: Everything Else
         return "Rest", ""

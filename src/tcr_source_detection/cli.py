@@ -130,7 +130,7 @@ def run_pipeline():
     target_df["SourceInfo"] = source_infos
     
     # 4. Generate Reports
-    generate_coverage_report(target_df, params["dataset"], params["output_log"])
+    generate_coverage_report(target_df, params["iggytop_path"], params["dataset"], params["output_log"])
 
 if __name__ == "__main__":
     run_pipeline()
