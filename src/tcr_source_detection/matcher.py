@@ -115,9 +115,5 @@ class TCRMatcher:
         if a_pep_match or b_pep_match:
             return "Partial Match (A/B)", ""
 
-        # Priority 3: Final 10X check (already handled by pre-check logic above, 
-        # but kept for logical flow if non-full matches were allowed in 10X ref)
-        # However, we've already checked 10X by sequence above to prioritize it over Exact Match.
-
         # Priority 4: Everything Else
         return "Rest", ""

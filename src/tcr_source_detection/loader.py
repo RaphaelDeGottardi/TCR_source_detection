@@ -10,14 +10,18 @@ def load_target_dataset(dataset_path: str, alpha_col: str, beta_col: str, epitop
     if dataset_path.endswith(".tsv") or dataset_path.endswith(".txt"):
         df = pd.read_csv(dataset_path, sep="\t")
     elif dataset_path.endswith(".csv"):
-        # Specific handling for multi-index headers sometimes seen in CDR3 datasets
-        try:
-            df = pd.read_csv(dataset_path, header=[0, 1], dtype=str)
-            df.columns = [
-                ' '.join([str(c).strip() for c in col if str(c).strip() and not str(c).lower().startswith('unnamed')])
-                for col in df.columns.values
-            ]
-        except:
+        # CEDAR and IEDB datasets specifically have multi-index (two-line) headers
+        if "_v3" in dataset_path.lower():
+            try:
+                df = pd.read_csv(dataset_path, header=[0, 1], dtype=str)
+                df.columns = [
+                    ' '.join([str(c).strip() for c in col if str(c).strip() and not str(c).lower().startswith('unnamed')])
+                    for col in df.columns.values
+                ]
+            except Exception as e:
+                print(f"Warning: Failed to load CEDAR multi-index header, falling back to simple load: {e}")
+                df = pd.read_csv(dataset_path, dtype=str)
+        else:
             df = pd.read_csv(dataset_path, dtype=str)
     elif dataset_path.endswith(".xlsx") or dataset_path.endswith(".xls"):
         df = pd.read_excel(dataset_path)

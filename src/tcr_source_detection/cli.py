@@ -27,7 +27,7 @@ def run_pipeline():
     target_group.add_argument("--beta_col", help="Column name for beta CDR3")
     target_group.add_argument("--epitope_col", help="Column name for epitope/peptide")
     target_group.add_argument("--target_col", help="Column name for filtering (optional)")
-    target_group.add_argument("--target_pos", default="1", help="Positive value for target_col filtering")
+    target_group.add_argument("--target_pos", default=None, help="Positive value for target_col filtering")
     
     # External configuration
     ref_group = parser.add_argument_group("External Configuration")
