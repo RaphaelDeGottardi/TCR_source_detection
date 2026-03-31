@@ -30,11 +30,13 @@ def generate_coverage_report(df: pd.DataFrame, source_path: str, dataset_path: s
         
         categories = [
             "Exact Match (Full)", 
-            "Partial Match (A/B)", 
-            "Unmatched (10X Exclusion)", 
+            "Partial Match (A/B)",
+            "Iggytop (10X Exclusion)", 
+            "10X Match",
+            "Partial 10X Match",
+            "Multi-epitope (+)", 
             "No CDR3 info", 
             "No Epitope", 
-            "Multi-epitope (+)", 
             "Rest"
         ]
         

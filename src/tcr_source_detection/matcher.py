@@ -15,6 +15,7 @@ class TCRMatcher:
         self.iggy_a_pep: Set[CDR3_PEPTIDE] = set()
         self.iggy_b_pep: Set[CDR3_PEPTIDE] = set()
         self.iggy_source_map: Dict[TCR_TRIPLET, str] = {}
+        self.iggy_source_map_part: Dict[CDR3_PEPTIDE, str] = {}
         self.tenx_full_set: Set[TCR_TRIPLET] = set()
         self.tenx_a_pep: Set[CDR3_PEPTIDE] = set()
         self.tenx_b_pep: Set[CDR3_PEPTIDE] = set()
@@ -54,8 +55,8 @@ class TCRMatcher:
             return set(records.itertuples(index=False, name=None)), {}
 
         self.iggy_full_set, self.iggy_source_map = build_set(subset_df, ["CDR3a", "CDR3b", "peptide"], source_col)
-        self.iggy_a_pep, _ = build_set(subset_df, ["CDR3a", "peptide"])
-        self.iggy_b_pep, _ = build_set(subset_df, ["CDR3b", "peptide"])
+        self.iggy_a_pep, self.iggy_source_map_a = build_set(subset_df, ["CDR3a", "peptide"], source_col)
+        self.iggy_b_pep, self.iggy_source_map_b = build_set(subset_df, ["CDR3b", "peptide"], source_col)
 
     def _prepare_tenx_sets(self, tenx_df):
         """Prepare sets from 10X reference CSV."""
@@ -74,7 +75,7 @@ class TCRMatcher:
         self.tenx_a_pep = build_set(norm_df, ["CDR3a", "peptide"])
         self.tenx_b_pep = build_set(norm_df, ["CDR3b", "peptide"])
 
-    def match_record(self, a_norm: str, b_norm: str, pep_norm: str, pmid: str = "") -> Tuple[str, str]:
+    def match_record(self, a_norm: str, b_norm: str, pep_norm: str) -> Tuple[str, str]:
         """
         Categorizes a single TCR record.
         Returns: (category, source_info)
@@ -92,12 +93,13 @@ class TCRMatcher:
 
         # Pre-check for 10X exclusion from input pmid or sequence match in local 10X ref
         triplet = (a_norm, b_norm, pep_norm)
-        is_tenx_by_seq = triplet in self.tenx_full_set or \
-                        ((a_norm, pep_norm) in self.tenx_a_pep if not pd.isna(a_norm) else False) or \
-                        ((b_norm, pep_norm) in self.tenx_b_pep if not pd.isna(b_norm) else False)
+        if triplet in self.tenx_full_set:
+                return "10X Match", "10X"
         
-        if str(pmid).startswith("https://www.10x") or is_tenx_by_seq:
-            return "Unmatched (10X Exclusion)", "10X"
+        if ((a_norm, pep_norm) in self.tenx_a_pep if not pd.isna(a_norm) else False) or \
+            ((b_norm, pep_norm) in self.tenx_b_pep if not pd.isna(b_norm) else False):
+            return "Partial 10X Match", "10X partial"
+                   
 
         # Priority 1: Exact Match in Iggytop
         if triplet in self.iggy_full_set:
@@ -105,7 +107,7 @@ class TCRMatcher:
             
             # Sub-check: If matching part of Iggytop that is actually 10X
             if "https://www.10xgenomics.com" in source_info or "no_pmid_1036521" in source_info:
-                return "Unmatched (10X Exclusion)", f"Iggytop/10X ({source_info})"
+                return "Iggytop (10X Exclusion)", f"Iggytop/10X ({source_info})"
                 
             return "Exact Match (Full)", source_info
 
@@ -113,6 +115,15 @@ class TCRMatcher:
         a_pep_match = (a_norm, pep_norm) in self.iggy_a_pep if not pd.isna(a_norm) else False
         b_pep_match = (b_norm, pep_norm) in self.iggy_b_pep if not pd.isna(b_norm) else False
         if a_pep_match or b_pep_match:
+            if a_pep_match:
+                source_info = self.iggy_source_map_a.get((a_norm, pep_norm), "")
+            else:
+                source_info = self.iggy_source_map_b.get((b_norm, pep_norm), "")
+            
+            # Sub-check: If matching part of Iggytop that is actually 10X
+            if "https://www.10xgenomics.com" in source_info or "no_pmid_1036521" in source_info:
+                return "Iggytop (10X Exclusion)", f"Iggytop/10X ({source_info})"
+                
             return "Partial Match (A/B)", ""
 
         # Priority 4: Everything Else

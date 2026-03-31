@@ -8,7 +8,7 @@ from .matcher import TCRMatcher
 from .reporter import generate_coverage_report
 from .config import save_config, get_config, list_configs
 
-DEFAULT_IGGYTOP_PATH = "/home/dego/.cache/iggytop_airr/merged_anndata.h5ad"
+DEFAULT_IGGYTOP_PATH = "/cluster/home/dego/.cache/iggytop_airr/merged_anndata.h5ad"
 DEFAULT_TENX_PATH = "10x_raw.csv"
 
 def run_pipeline():
@@ -120,9 +120,8 @@ def run_pipeline():
         a = row["CDR3a_norm"]
         b = row["CDR3b_norm"]
         pep = row["Peptide_norm"]
-        pmid = row[pmid_col] if pmid_col else ""
         
-        category, source_info = matcher.match_record(a, b, pep, pmid)
+        category, source_info = matcher.match_record(a, b, pep)
         results.append(category)
         source_infos.append(source_info)
     
